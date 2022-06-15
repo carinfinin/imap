@@ -12,7 +12,8 @@ class SaveAttachment {
         $this->mail_password = $password;
         $this->host_imap = "{imap.$host:993/imap/ssl}";
         $this->connection = imap_open($this->host_imap, $this->mail_login, $this->mail_password);
-        if(!$this->connection) exit('Ошибка соединения');
+        if(!$this->connection)
+            exit('Ошибка соединения');
     }
 
     private function getAttachment($str) {
@@ -69,18 +70,30 @@ class SaveAttachment {
             if ($email_attachments && $email_attachments != [])
                 return $email_attachments;
             else
-                die('Вложений нет');
+                echo 'Вложений нет';
         }else {
-            die('Писем нет');
+            echo 'Писем нет';
         }
-
+        return false;
     }
     private function writeFile($name, $data) {
-        $path = $_SERVER['DOCUMENT_ROOT'].'/imap/'.$name;
+        $path = $_SERVER['DOCUMENT_ROOT'].'/imap/xlsx/';
+        $this->clear_dir($path);
+
+        $path .= $name;
         $fp = fopen($path, "w");
         fwrite($fp, $data);
         fclose($fp);
         return $path;
+    }
+
+    private function clear_dir($dir) {
+        $list = scandir($dir);
+        unset($list[0],$list[1]);
+        foreach ($list as $file)
+        {
+            unlink($dir.$file);
+        }
     }
 
     public function createFile( $str = 'ALL') {  // 'UNSEEN' - непрочитанные
@@ -90,6 +103,10 @@ class SaveAttachment {
 //            echo $attachment['filename'];
             $path = $this->writeFile($attachment['filename'], $attachment['attachment']);
             $arrPath[$attachment['date']] = $path;
+
+            $fp = fopen($_SERVER['DOCUMENT_ROOT'] . '/imap/date_update.txt', "w");
+            fwrite($fp, $attachment['date']);
+            fclose($fp);
         }
         return $arrPath;
     }
