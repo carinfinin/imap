@@ -5,7 +5,7 @@ class SaveAttachment {
     private $mail_password;
     private $host_imap;
     private $connection;
-    
+
 
     public function __construct($email, $password, $host = 'yandex.ru') {   // gmail.com
         $this->mail_login = $email;
@@ -23,8 +23,8 @@ class SaveAttachment {
             $email_attachments = [];
             foreach ($msg_num as $emailsNumber) {
                 $msg_header = imap_header($this->connection, $emailsNumber);
-    //            echo $msg_header->MailDate;  // дата
-    //            echo(imap_mime_header_decode($msg_header->subject)[0]->text);  // тема письма
+                //            echo $msg_header->MailDate;  // дата
+                //            echo(imap_mime_header_decode($msg_header->subject)[0]->text);  // тема письма
                 $attachments = [];
                 $msg_structure = imap_fetchstructure($this->connection, $emailsNumber);
 
@@ -62,39 +62,10 @@ class SaveAttachment {
                         }
                     }
 
-
+                    $email_attachments = array_merge($email_attachments, array_filter($attachments, function ($attachment) {
+                        return $attachment['is_attachment'] == 1;
+                    }));
                 }
-                elseif (isset($msg_structure->ifdparameters)) {   // структура письма изменилась теперь так
-
-                    var_dump($msg_structure->ifdparameters);
-
-                    foreach ($msg_structure->dparameters as $key => $object) {
-                        $attachments[$key] = array(
-                            'is_attachment' => false,
-                            'filename' => '',
-                            'name' => '',
-                            'attachment' => '',
-                            'date' => $msg_header->MailDate
-                        );
-                        if (strtolower($object->attribute) == 'filename') {
-                            $attachments[$key]['is_attachment'] = true;
-                            $attachments[$key]['filename'] = imap_mime_header_decode($object->value)[0]->text;
-
-                        }
-                        if (strtolower($object->attribute) == 'name') {
-                            $attachments[$key]['is_attachment'] = true;
-                            $attachments[$key]['name'] = imap_mime_header_decode($object->value)[0]->text;
-                        }
-                    }
-
-                    if ($attachments[$key]['is_attachment']) {
-                        $attachments[$key]['attachment'] = imap_fetchbody($this->connection, $emailsNumber, $key + 1);
-                        $attachments[$key]['attachment'] = base64_decode($attachments[$key]['attachment']);
-                    }
-                }
-                $email_attachments = array_merge($email_attachments, array_filter($attachments, function ($attachment) {
-                    return $attachment['is_attachment'] == 1;
-                }));
             }
             if ($email_attachments && $email_attachments != [])
                 return $email_attachments;

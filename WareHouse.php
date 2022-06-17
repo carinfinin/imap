@@ -2,8 +2,8 @@
 use Bitrix\Main\Type\DateTime;
 
 class WareHouse {
-    private $columnDate = 36;
-    private $columnCount = 35;
+    private $columnDate = 34;
+    private $columnCount = 33;
     private $columnName = 0;
     private $formats = ['xlsx', 'xls', 'XLSX', 'XLS'];
 
@@ -69,7 +69,7 @@ class WareHouse {
                 $nColumn = PHPExcel_Cell::columnIndexFromString($sheet->getHighestColumn());
                 if($sheet->getCellByColumnAndRow($this->columnDate, $i)->getValue()) {
                     $nameProducts = $sheet->getCellByColumnAndRow($this->columnName, $i)->getValue();  //NAME
-                    $dateProducts = $sheet->getCellByColumnAndRow($this->columnDate, $i)->getValue(); //date
+                    $dateProducts = ($sheet->getCellByColumnAndRow($this->columnDate, $i)->getValue()) * -1; //date
                     $countProducts = $sheet->getCellByColumnAndRow($this->columnCount, $i)->getValue(); //count
                     if($products[$nameProducts] && $dateProducts != '#NULL!' && $countProducts != '#NULL!') {
                         $this->setProducts($products[$nameProducts], $this->getDate($date, $dateProducts), $countProducts);

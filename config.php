@@ -1,5 +1,5 @@
 <?
 return [
-    'email'=>'qw@yamdex.ru',
+    'email'=>'mail@yandex.ru',
     'password'=>'пароль'
 ];
